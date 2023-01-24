@@ -4,7 +4,7 @@ const rightNum = document.getElementById("right-num");
 // canvas instantiation
 const canvas = document.getElementById("canvas");
 const canvas2d = canvas.getContext("2d");
-canvas2d.filter = `blur(1px)`;
+canvas2d.filter = `blur(0.5px)`;
 let canvasOrigin = { x: canvas.width / 2, y: canvas.height / 2 };
 // delta time vars
 let lastTime = performance.now();
