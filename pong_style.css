@@ -1,0 +1,53 @@
+@font-face {
+  font-family: minim;
+  src: url('./minim.100.otf');
+}
+
+body {
+  overflow: hidden;
+  display: flex;
+}
+
+#canvas {
+  height: 95vh;
+  width: auto;
+  margin: auto;
+  padding: 6px;
+  box-shadow: inset 0 0 1px 5px #fff, 0 0 1px 5px #fff;
+}
+
+#nums-container {
+  filter: blur(0.5px);
+  display: inline;
+  position: absolute;
+  width: 100%;
+  margin-left: 10px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+}
+
+#left-num,
+#right-num {
+  filter: blur(0.5px);
+  font-family: 'minim', monospace;
+  color: #fff;
+  font-size: 120;
+  margin: 32px 0 0 0;
+  letter-spacing: 10px;
+}
+
+#left-num::selection,
+#right-num::selection {
+  background-color: transparent;
+}
+
+#left-num {
+  text-align: right;
+  margin-right: 32px;
+}
+
+#right-num {
+  text-align: right;
+  margin-left: 32px;
+}
