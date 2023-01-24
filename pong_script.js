@@ -12,7 +12,7 @@ let timeElapsed;
 let elapsedCounter = 0
 
 // drawing vars
-let cols = ["#000000a0", "#fff"]; // black, white
+let cols = ["#2f3a1c", "#fff"]; // black, white
 
 //score
 let score = [0, 0];
@@ -147,7 +147,7 @@ function calculateCollision(paddle) {
     radians = Math.atan2(Ball.vector.y, Ball.vector.x);
     //convert radians to degrees to add angle
     let degrees = radians * (180 / Math.PI);
-    if (Math.abs(degrees) < 60) { degrees += originComparison }
+    if (Math.abs(degrees) < 45) { degrees += originComparison }
     //convert back to radians and then to vectors
     radians = degrees / (180 / Math.PI);
     Ball.vector.x = Math.cos(radians);
