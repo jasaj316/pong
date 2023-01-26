@@ -24,7 +24,7 @@ let moveInc = maxMovePos / 20;
 let originComparison;
 let lastPaddle = null;
 let heightPrediction = 0;
-let randomizePrediction = Math.random() / 2 + 0.75;
+let randomizePrediction = Math.pow(Math.random() + 0.5, 0.2);
 
 const Paddles = [{
   size: { x: 32, y: maxMovePos / 2 },
@@ -110,9 +110,10 @@ function playerInput() {
 }
 
 function aiInput() {
-  // if moving left and 2/3 of the way left
-  if (Ball.vector.x <= 0 && Ball.offset.x < (canvasOrigin.x * 1 / 3)) {
+  // if moving left and 2/3 (* random value) of the way left
+  if (Ball.vector.x <= 0 && Ball.offset.x < randomizePrediction * (canvasOrigin.x * 1 / 3)) {
     // if AI can make a decision
+    console.log(randomizePrediction * (canvasOrigin.x * 1 / 4))
     if (AI.delay <= 0) {
       // ball above paddle
       if (heightPrediction < Paddles[0].offset.y - Paddles[0].size.y / 3) {
@@ -126,7 +127,7 @@ function aiInput() {
       else {
         AI.dir = "x";
       }
-      AI.delay = (6);
+      AI.delay = (5.8);
     }
     else {
       paddleMovement(0, AI.dir);
@@ -176,7 +177,7 @@ function endGame(pointFor) {
   })
   Ball.init();
   lastPaddle = null;
-  randomizePrediction = Math.random() / 2 + 0.75;
+  randomizePrediction = Math.pow(Math.random() + 0.5, 0.2);;
   scoreUpdate(pointFor);
 }
 
@@ -190,8 +191,8 @@ function detectCollision() {
       calculateCollision(1);
       // calcuate height of impact for the AI
       heightPrediction = (Math.tan(Ball.radians) * (Ball.worldPos().x - Paddles[0].size.x)) + Ball.offset.y;
-      // high chance of miss from paddle
-      randomizePrediction = Math.random() / 2 + 0.75;
+      // low chance of miss from paddle
+      randomizePrediction = Math.pow(Math.random() + 0.5, 0.4);
       heightPrediction *= randomizePrediction;
 
     }
@@ -214,7 +215,7 @@ function detectCollision() {
 
     heightPrediction = -(Math.tan(Ball.radians) * (Ball.worldPos().x - Paddles[0].size.x)) + Ball.offset.y;
     // higher chance of miss from top or bottom
-    randomizePrediction = Math.random() / 0.75 + 0.5;
+    randomizePrediction = Math.pow(Math.random() + 0.5, 0.8);
     heightPrediction *= randomizePrediction;
   }
   if (Ball.offset.x < canvasOrigin.x * -1.25) {
