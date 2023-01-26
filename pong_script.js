@@ -111,23 +111,24 @@ function playerInput() {
 
 function aiInput() {
   // if moving left and 2/3 (* random value) of the way left
-  if (Ball.vector.x <= 0 && Ball.offset.x < randomizePrediction * (canvasOrigin.x * 1 / 3)) {
+
+  if (Ball.vector.x <= 0 && Ball.offset.x < Math.pow(randomizePrediction, 3) * (canvasOrigin.x * 1 / 3)) {
     // if AI can make a decision
-    console.log(randomizePrediction * (canvasOrigin.x * 1 / 4))
     if (AI.delay <= 0) {
       // ball above paddle
-      if (heightPrediction < Paddles[0].offset.y - Paddles[0].size.y / 3) {
+      if (heightPrediction < Paddles[0].offset.y - Paddles[0].size.y / 2.5) {
         AI.dir = "u";
       }
       // ball under paddle
-      else if (heightPrediction > Paddles[0].offset.y + Paddles[0].size.y / 3) {
+      else if (heightPrediction > Paddles[0].offset.y + Paddles[0].size.y / 2.5) {
         AI.dir = "d";
       }
       // ball in front of paddle
       else {
         AI.dir = "x";
       }
-      AI.delay = (5.8);
+      //set delay to 7 (* random value)
+      AI.delay = (7) * Math.pow(randomizePrediction, 0.5);
     }
     else {
       paddleMovement(0, AI.dir);
@@ -146,13 +147,19 @@ function calculateCollision(curPaddle) {
   // alternate collision between paddles
   if (lastPaddle != curPaddle) {
     originComparison = curPaddle === 1 ?
-      (Ball.offset.y - Paddles[1].offset.y) * 0.3
-      : (Ball.offset.y - Paddles[0].offset.y) * -0.3;
+      (Ball.offset.y - Paddles[1].offset.y) * 0.4
+      : (Ball.offset.y - Paddles[0].offset.y) * -0.4;
     // convert vectors to radians
     Ball.radians = Math.atan2(Ball.vector.y, Ball.vector.x);
     // convert radians to degrees to add angle
     Ball.degrees = Ball.radians * 180 / Math.PI;
-    if (Math.abs(Ball.degrees) < 45) { Ball.degrees += originComparison }
+    //add angle from paddle
+    Ball.degrees += originComparison
+    //clamp output to keep a shallow angle
+    if (Ball.degrees < 135 && Ball.degrees > 90) { Ball.degrees = 135 } // low angle to the right -> 135
+    else if (Ball.degrees < 90 && Ball.degrees > 45) { Ball.degrees = 45 } // low angle to the left -> 45
+    else if (Ball.degrees > -135 && Ball.degrees < -90) { Ball.degrees = -135 } // high angle to the right -> -135
+    else if (Ball.degrees > -90 && Ball.degrees < -45) { Ball.degrees = -45 } // high angle to the left -> -45
     // convert back to radians and then to vectors
     Ball.radians = Ball.degrees * Math.PI / 180;
     Ball.vector.x = Math.cos(Ball.radians);
@@ -160,6 +167,7 @@ function calculateCollision(curPaddle) {
     Ball.vector.y = Math.sin(Ball.radians);
     // prevent double calculations on same paddle
     lastPaddle = curPaddle;
+
   }
 }
 
@@ -192,7 +200,7 @@ function detectCollision() {
       // calcuate height of impact for the AI
       heightPrediction = (Math.tan(Ball.radians) * (Ball.worldPos().x - Paddles[0].size.x)) + Ball.offset.y;
       // low chance of miss from paddle
-      randomizePrediction = Math.pow(Math.random() + 0.5, 0.4);
+      randomizePrediction = Math.pow(Math.random() + 0.5, 0.3);
       heightPrediction *= randomizePrediction;
 
     }
@@ -215,7 +223,7 @@ function detectCollision() {
 
     heightPrediction = -(Math.tan(Ball.radians) * (Ball.worldPos().x - Paddles[0].size.x)) + Ball.offset.y;
     // higher chance of miss from top or bottom
-    randomizePrediction = Math.pow(Math.random() + 0.5, 0.8);
+    randomizePrediction = Math.pow(Math.random() + 0.5, 0.6);
     heightPrediction *= randomizePrediction;
   }
   if (Ball.offset.x < canvasOrigin.x * -1.25) {
