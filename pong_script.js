@@ -4,7 +4,6 @@ const rightNum = document.getElementById("right-num");
 // canvas instantiation
 const canvas = document.getElementById("canvas");
 const canvas2d = canvas.getContext("2d");
-canvas2d.filter = `blur(0.5px)`;
 let canvasOrigin = { x: canvas.width / 2, y: canvas.height / 2 };
 // delta time vars
 let lastTime = performance.now();
@@ -23,8 +22,8 @@ let AI = { delay: 0, dir: "u" };
 let maxMovePos = canvas.height / 2.56;
 let moveInc = maxMovePos / 20;
 let originComparison;
-let lastCollider = null;
-let radians;
+let lastPaddle = null;
+let heightPrediction = 0;
 
 const Paddles = [{
   size: { x: 32, y: maxMovePos / 2 },
@@ -51,7 +50,9 @@ const Ball = {
   size: 32,
   offset: { x: 0, y: 0 },
   vector: { x: 0, y: 0 },
-  speed: 6,
+  speed: 4,
+  radians: 0,
+  degrees: 0,
   worldPos: function () {
     return { x: canvasOrigin.x + this.offset.x, y: canvasOrigin.y + this.offset.y }
   },
@@ -59,19 +60,22 @@ const Ball = {
     // init random radians, to ball vector
     let acceptable = false;
     while (!acceptable) {
-      radians = Math.random();
-      if ((radians > 0.1 && radians < 0.4) || (radians > 0.6 && radians < 0.9))
+      this.radians = Math.random();
+      if ((this.radians > 0.15 && this.radians < 0.35) || (this.radians > 0.65 && this.radians < 0.85))
         acceptable = false;
       else
         acceptable = true;
     }
-    radians = radians * Math.PI * 2 - Math.PI;
-    this.vector.x = Math.cos(radians);
-    this.vector.y = Math.sin(radians);
+
+    this.radians = this.radians * 2 * Math.PI - Math.PI;
+    // height prediction for AI
+    heightPrediction = -(Math.tan(Ball.radians) * (canvasOrigin.x - Paddles[0].size.x));
+    this.vector.x = Math.cos(this.radians);
+    this.vector.y = Math.sin(this.radians);
     //init position
     this.offset.x = 0;
     this.offset.y = 0;
-    this.speed = 6;
+    this.speed = 4;
   }
 };
 
@@ -105,29 +109,27 @@ function playerInput() {
 }
 
 function aiInput() {
-  //if moving toward AI
-  if (Ball.vector.x <= 0.1 && Ball.offset.x < maxMovePos * (3 / 4)) {
-    //if AI can make a decision
-    if (AI.delay <= 0) {
-      //if 
-      if (Paddles[0].offset.y + Paddles[0].size.y / 2 < Ball.offset.y - Ball.size
-        && Paddles[0].offset.y - Paddles[0].size.y / 2 > Ball.offset.y + Ball.size) {
-      }
-      else if (Paddles[0].offset.y > Ball.offset.y + Ball.size) {
+  // if AI can make a decision
+  if (AI.delay <= 0) {
+    // if moving left and 3/4 of the way left
+    if (Ball.vector.x <= 0 && Ball.offset.x < canvas.width / 4) {
+      // ball above paddle
+      if (heightPrediction < Paddles[0].offset.y - Paddles[0].size.y / 3) {
         AI.dir = "u";
       }
-      else if (Paddles[0].offset.y < Ball.offset.y - Ball.size) {
+      // ball under paddle
+      else if (heightPrediction > Paddles[0].offset.y + Paddles[0].size.y / 3) {
         AI.dir = "d";
       }
+      // ball in front of paddle
       else {
         AI.dir = "x";
       }
-      AI.delay = Math.abs(Ball.vector.y * 10);
+      AI.delay = (6);
     }
-    else {
-      paddleMovement(0, AI.dir);
-      AI.delay -= 1;
-    }
+  } else {
+    paddleMovement(0, AI.dir);
+    AI.delay -= 1;
   }
 }
 
@@ -137,41 +139,41 @@ function ballMovement() {
   Ball.offset.y += Ball.vector.y * Ball.speed;
 }
 
-function calculateCollision(paddle) {
-  //alternate collision between paddles
-  if (lastCollider != paddle) {
-    originComparison = paddle === 1 ?
+function calculateCollision(curPaddle) {
+  // alternate collision between paddles
+  if (lastPaddle != curPaddle) {
+    originComparison = curPaddle === 1 ?
       (Ball.offset.y - Paddles[1].offset.y) * 0.3
       : (Ball.offset.y - Paddles[0].offset.y) * -0.3;
-    //convert vectors to radians
-    radians = Math.atan2(Ball.vector.y, Ball.vector.x);
-    //convert radians to degrees to add angle
-    let degrees = radians * (180 / Math.PI);
-    if (Math.abs(degrees) < 45) { degrees += originComparison }
-    //convert back to radians and then to vectors
-    radians = degrees / (180 / Math.PI);
-    Ball.vector.x = Math.cos(radians);
-    paddle == 0 ? Ball.vector.x = Math.abs(Ball.vector.x) : Ball.vector.x = -Math.abs(Ball.vector.x);
-    Ball.vector.y = Math.sin(radians);
-    //prevent double calculations on same paddle
-    lastCollider = paddle;
+    // convert vectors to radians
+    Ball.radians = Math.atan2(Ball.vector.y, Ball.vector.x);
+    // convert radians to degrees to add angle
+    Ball.degrees = Ball.radians * 180 / Math.PI;
+    if (Math.abs(Ball.degrees) < 45) { Ball.degrees += originComparison }
+    // convert back to radians and then to vectors
+    Ball.radians = Ball.degrees * Math.PI / 180;
+    Ball.vector.x = Math.cos(Ball.radians);
+    curPaddle == 0 ? Ball.vector.x = Math.abs(Ball.vector.x) : Ball.vector.x = -Math.abs(Ball.vector.x);
+    Ball.vector.y = Math.sin(Ball.radians);
+    // prevent double calculations on same paddle
+    lastPaddle = curPaddle;
   }
 }
 
 function scoreUpdate(pointFor = null) {
-  //update score
+  // update score
   if (pointFor !== null) { score[pointFor]++ }
   leftNum.textContent = score[0] < 10 ? `0${score[0]}` : score[0];
   rightNum.textContent = score[1] < 10 ? `0${score[1]}` : score[1];
 }
 
 function endGame(pointFor) {
-  //reset objects
+  // reset objects
   Paddles.forEach(paddle => {
     paddle.init();
   })
   Ball.init();
-  lastCollider = null;
+  lastPaddle = null;
   scoreUpdate(pointFor);
 }
 
@@ -183,6 +185,8 @@ function detectCollision() {
       && Ball.worldPos().y + Ball.size / 2 >= Paddles[1].worldPos().y - Paddles[1].size.y / 2) {
       // ball is in the y coordinate of the right paddle
       calculateCollision(1);
+      // calcuate height of impact for the AI
+      heightPrediction = (Math.tan(Ball.radians) * (Ball.worldPos().x - Paddles[0].size.x)) + Ball.offset.y;
     }
   }
   else if (Ball.worldPos().x - Ball.size / 2 <= Paddles[0].worldPos().x + Paddles[0].size.x / 2
@@ -195,14 +199,19 @@ function detectCollision() {
     }
   }
   if (Ball.offset.y + Ball.size / 2 >= canvas.height / 2 || Ball.offset.y - Ball.size / 2 <= -canvas.height / 2) {
-    //hitting top
+    // hitting top
     Ball.vector.y = -Ball.vector.y;
+    // recalcuate radians, height of impact for the AI
+    Ball.radians = Math.atan2(Ball.vector.y, Ball.vector.x);
+    heightPrediction = -(Math.tan(Ball.radians) * (Ball.worldPos().x - Paddles[0].size.x)) + Ball.offset.y;
+
+    console.log(Math.floor(canvasOrigin.y + heightPrediction))
   }
-  else if (Ball.offset.x <= -canvasOrigin.x * 1.4) {
+  if (Ball.offset.x < canvasOrigin.x * -1.25) {
     // miss on left
     endGame(1);
   }
-  else if (Ball.offset.x >= canvasOrigin.x * 1.4) {
+  else if (Ball.offset.x > canvasOrigin.x * 1.25) {
     // miss on right
     endGame(0);
   }
@@ -230,34 +239,24 @@ function drawScreen() {
 
 
 function update() {
-  thisTime = performance.now();
-  timeElapsed = thisTime - lastTime;
-  lastTime = thisTime;
-  elapsedCounter += timeElapsed;
-
-  if (elapsedCounter > 1000 / 80 /*fps*/) {
-    // loop
-    ballMovement();
-    detectCollision();
-    playerInput();
-    aiInput();
-    drawScreen();
-    //
-    elapsedCounter = 0;
-  }
-  requestAnimationFrame(update)
+  ballMovement();
+  detectCollision();
+  playerInput();
+  aiInput();
+  drawScreen();
+  requestAnimationFrame(update);
 }
 
 addEventListener("keydown", e => {
-  switch (e.keyCode) {
-    case 38: upKey = true; return;
-    case 40: downKey = true; return;
+  switch (e.key) {
+    case "ArrowUp": upKey = true; return;
+    case "ArrowDown": downKey = true; return;
   }
 });
 addEventListener("keyup", e => { //if neither key has been pressed, set the pressed key to true
-  switch (e.keyCode) {
-    case 38: upKey = false; return;
-    case 40: downKey = false; return;
+  switch (e.key) {
+    case "ArrowUp": upKey = false; return;
+    case "ArrowDown": downKey = false; return;
   }
 });
 

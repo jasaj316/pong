@@ -29,7 +29,6 @@ body {
 
 #left-num,
 #right-num {
-  filter: blur(0.5px);
   font-family: 'minim', monospace;
   color: #fff;
   font-size: 120;
