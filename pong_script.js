@@ -127,9 +127,8 @@ function aiInput() {
       else {
         AI.dir = "";
       }
-      //set delay to 6 * (random value (prediction ^ 0.5)) + (delay from high angles (0-1))
-      AI.delay = 6 * Math.pow(randomizePrediction, 0.5) + ((1 - Math.abs(Ball.vector.x)) * 3.4)
-      console.log(AI.delay)
+      //set delay to 6 * (random value (prediction ^ 0.5)) + (delay from high angles (0-2))
+      AI.delay = 6 * Math.pow(randomizePrediction, 0.5) + ((1 - Math.abs(Ball.vector.x)) * 6.8)
     }
     else {
       paddleMovement(0, AI.dir);
