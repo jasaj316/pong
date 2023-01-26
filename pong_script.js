@@ -112,7 +112,7 @@ function playerInput() {
 function aiInput() {
   // if moving left and 2/3 (* random value) of the way left
 
-  if (Ball.vector.x <= 0 && Ball.offset.x < Math.pow(randomizePrediction, 3) * (canvasOrigin.x * 1 / 3)) {
+  if (Ball.vector.x <= 0 && Ball.offset.x < randomizePrediction * (canvasOrigin.x * 1 / 3)) {
     // if AI can make a decision
     if (AI.delay <= 0) {
       // ball above paddle
@@ -125,10 +125,11 @@ function aiInput() {
       }
       // ball in front of paddle
       else {
-        AI.dir = "x";
+        AI.dir = "";
       }
-      //set delay to 7 (* random value)
-      AI.delay = (7) * Math.pow(randomizePrediction, 0.5);
+      //set delay to 6 * (random value (prediction ^ 0.5)) + (delay from high angles (0-1))
+      AI.delay = 6 * Math.pow(randomizePrediction, 0.5) + ((1 - Math.abs(Ball.vector.x)) * 3.4)
+      console.log(AI.delay)
     }
     else {
       paddleMovement(0, AI.dir);
@@ -200,7 +201,7 @@ function detectCollision() {
       // calcuate height of impact for the AI
       heightPrediction = (Math.tan(Ball.radians) * (Ball.worldPos().x - Paddles[0].size.x)) + Ball.offset.y;
       // low chance of miss from paddle
-      randomizePrediction = Math.pow(Math.random() + 0.5, 0.3);
+      randomizePrediction = Math.pow(Math.random() + 0.5, 0.2);
       heightPrediction *= randomizePrediction;
 
     }
@@ -223,7 +224,7 @@ function detectCollision() {
 
     heightPrediction = -(Math.tan(Ball.radians) * (Ball.worldPos().x - Paddles[0].size.x)) + Ball.offset.y;
     // higher chance of miss from top or bottom
-    randomizePrediction = Math.pow(Math.random() + 0.5, 0.6);
+    randomizePrediction = Math.pow(Math.random() + 0.5, 0.5);
     heightPrediction *= randomizePrediction;
   }
   if (Ball.offset.x < canvasOrigin.x * -1.25) {
