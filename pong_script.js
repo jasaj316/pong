@@ -4,6 +4,9 @@ const rightNum = document.getElementById("right-num");
 // canvas instantiation
 const canvas = document.getElementById("canvas");
 const canvas2d = canvas.getContext("2d");
+// canvas size
+canvas.height = window.innerHeight;
+canvas.width = window.innerHeight;
 let canvasOrigin = { x: canvas.width / 2, y: canvas.height / 2 };
 // delta time vars
 let lastTime = performance.now();
@@ -27,7 +30,7 @@ let heightPrediction = 0;
 let randomizePrediction = Math.pow(Math.random() + 0.5, 0.2);
 
 const Paddles = [{
-  size: { x: 32, y: maxMovePos / 2 },
+  size: { x: canvas.width / 30, y: maxMovePos / 2 },
   offset: { x: 0, y: 0 },
   worldPos: function () {
     return { x: this.size.x + this.offset.x, y: canvasOrigin.y + this.offset.y };
@@ -37,7 +40,7 @@ const Paddles = [{
   }
 },
 {
-  size: { x: 32, y: maxMovePos / 2 },
+  size: { x: canvas.width / 30, y: maxMovePos / 2 },
   offset: { x: 0, y: 0 },
   worldPos: function () {
     return { x: canvas.width - this.size.x + this.offset.x, y: canvasOrigin.y + this.offset.y };
@@ -48,10 +51,10 @@ const Paddles = [{
 }]
 
 const Ball = {
-  size: 32,
+  size: canvas.width / 30,
   offset: { x: 0, y: 0 },
   vector: { x: 0, y: 0 },
-  speed: 4,
+  speed: canvas.width / 210,
   radians: 0,
   degrees: 0,
   worldPos: function () {
@@ -76,7 +79,7 @@ const Ball = {
     //init position
     this.offset.x = 0;
     this.offset.y = 0;
-    this.speed = 4;
+    this.speed = canvas.width / 210;
   }
 };
 
@@ -245,7 +248,7 @@ function drawScreen() {
   canvas2d.lineWidth = Paddles[0].size.x / 2;
   canvas2d.beginPath();
   canvas2d.setLineDash([canvas.height / 30, canvas.height / 40]);
-  canvas2d.moveTo(canvasOrigin.x + Paddles[0].size.x / 4, 15);
+  canvas2d.moveTo(canvasOrigin.x + Paddles[0].size.x / 4, canvas.height / 60);
   canvas2d.lineTo(canvasOrigin.x + Paddles[0].size.x / 4, canvas.height)
   canvas2d.stroke();
   // Paddles
@@ -278,6 +281,21 @@ addEventListener("keyup", e => { //if neither key has been pressed, set the pres
     case "ArrowDown": downKey = false; return;
   }
 });
+
+
+addEventListener("resize", () => {
+  canvas.height = window.innerHeight;
+  canvas.width = window.innerHeight;
+  canvasOrigin = { x: canvas.width / 2, y: canvas.height / 2 };
+  maxMovePos = canvas.height / 2.56;
+  Ball.size = canvas.width / 30;
+  Paddles.forEach(paddle => {
+    paddle.size.y = maxMovePos / 2;
+    paddle.size.x = canvas.width / 30;
+  })
+  moveInc = maxMovePos / 20;
+})
+
 
 Ball.init();
 scoreUpdate();
