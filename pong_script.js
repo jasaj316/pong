@@ -282,7 +282,7 @@ addEventListener("keyup", e => { //if neither key has been pressed, set the pres
   }
 });
 
-
+// if window is resized, recalculate some screen-related variables
 addEventListener("resize", () => {
   canvas.height = window.innerHeight;
   canvas.width = window.innerHeight;
