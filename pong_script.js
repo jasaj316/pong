@@ -54,7 +54,7 @@ const Ball = {
   size: canvas.width / 30,
   offset: { x: 0, y: 0 },
   vector: { x: 0, y: 0 },
-  speed: canvas.width / 210,
+  speed: canvas.height / 220,
   radians: 0,
   degrees: 0,
   worldPos: function () {
@@ -79,7 +79,7 @@ const Ball = {
     //init position
     this.offset.x = 0;
     this.offset.y = 0;
-    this.speed = canvas.width / 210;
+    this.speed = canvas.height / 220;
   }
 };
 
@@ -141,7 +141,7 @@ function aiInput() {
 }
 
 function ballMovement() {
-  Ball.speed += 0.02;
+  Ball.speed += canvas.height * .00001;
   Ball.offset.x += Ball.vector.x * Ball.speed;
   Ball.offset.y += Ball.vector.y * Ball.speed;
 }
