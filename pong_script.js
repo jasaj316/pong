@@ -118,17 +118,15 @@ function aiInput() {
   if (Ball.vector.x <= 0 && Ball.offset.x < randomizePrediction * (canvasOrigin.x * 1 / 3)) {
     // if AI can make a decision
     if (AI.delay <= 0) {
-      // ball above paddle
+      // reset direction
+      AI.dir = "";
+      // if ball above paddle
       if (heightPrediction < Paddles[0].offset.y - Paddles[0].size.y / 2.5) {
         AI.dir = "u";
       }
-      // ball under paddle
+      // if ball under paddle
       else if (heightPrediction > Paddles[0].offset.y + Paddles[0].size.y / 2.5) {
         AI.dir = "d";
-      }
-      // ball in front of paddle
-      else {
-        AI.dir = "";
       }
       //set delay to 6 * (random value (prediction ^ 0.5)) + (delay from high angles (0-2))
       AI.delay = 6 * Math.pow(randomizePrediction, 0.5) + ((1 - Math.abs(Ball.vector.x)) * 6.8)
