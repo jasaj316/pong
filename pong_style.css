@@ -4,6 +4,7 @@
 }
 
 body {
+  background-color: "#1d250c";
   overflow: hidden;
   display: flex;
   justify-content: center;
